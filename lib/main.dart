@@ -1,5 +1,6 @@
 import 'package:cat_store_app/screens/home_screen.dart';
 import 'package:cat_store_app/theme/app_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -67,7 +68,7 @@ class _MyAppState extends State<MyApp> {
             textStyle: AppTheme.subtitle1,
           ),
         ),
-        fontFamily: 'System',
+        fontFamily: AppTheme.fontName,
         textTheme: const TextTheme(
           displayLarge: AppTheme.heading1,
           displayMedium: AppTheme.heading2,
@@ -77,6 +78,8 @@ class _MyAppState extends State<MyApp> {
           bodyLarge: AppTheme.body1,
           bodyMedium: AppTheme.body2,
           bodySmall: AppTheme.caption,
+        ).apply(
+          fontFamily: AppTheme.fontName,
         ),
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: {

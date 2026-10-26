@@ -156,6 +156,9 @@ class _DetailKucingState extends State<DetailKucing>
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      forceMaterialTransparency: true,
       leading: Container(
         margin: const EdgeInsets.all(AppTheme.spacing8),
         decoration: BoxDecoration(

@@ -24,6 +24,7 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
     "Siamese",
   ];
   late AnimationController _animationController;
+  final Set<int> _favoriteIndices = {};
 
   @override
   void initState() {
@@ -110,15 +111,15 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
             SliverToBoxAdapter(child: _buildHeader()),
             SliverToBoxAdapter(child: _buildSearchBar()),
             SliverToBoxAdapter(
-              child: const SizedBox(height: AppTheme.spacing20),
+              child: const SizedBox(height: 16),
             ),
             SliverToBoxAdapter(child: _buildCategoryChips()),
             SliverToBoxAdapter(
-              child: const SizedBox(height: AppTheme.spacing24),
+              child: const SizedBox(height: 16),
             ),
             SliverToBoxAdapter(child: _buildSectionHeader()),
             SliverToBoxAdapter(
-              child: const SizedBox(height: AppTheme.spacing16),
+              child: const SizedBox(height: 12),
             ),
             filteredCats.isEmpty
                 ? SliverToBoxAdapter(child: _buildEmptyState())
@@ -349,9 +350,13 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
 
   Widget _buildCategoryChips() {
     return SizedBox(
-      height: 46,
+      height: 44,
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacing24),
+        clipBehavior: Clip.none,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacing24,
+          vertical: 3,
+        ),
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: AppTheme.spacing8),
@@ -360,41 +365,76 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
           return GestureDetector(
             onTap: () => setState(() => selectedCategory = categories[index]),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
               padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacing20,
-                vertical: AppTheme.spacing8,
+                horizontal: 16,
+                vertical: 8,
               ),
               decoration: BoxDecoration(
                 gradient: isSelected ? AppTheme.primaryGradient : null,
-                color: isSelected ? null : AppTheme.surfaceColor,
+                color: isSelected ? null : Colors.white,
                 borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                 border: Border.all(
                   color: isSelected
                       ? Colors.transparent
-                      : Colors.black.withOpacity(0.08),
-                  width: 1.5,
+                      : AppTheme.primaryColor.withOpacity(0.12),
+                  width: 1.2,
                 ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: AppTheme.primaryColor.withOpacity(0.35),
-                          blurRadius: 12,
-                          offset: const Offset(0, 5),
+                          color: AppTheme.primaryColor.withOpacity(0.32),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                          spreadRadius: -2,
                         ),
                       ]
-                    : [],
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
-              child: Text(
-                categories[index],
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : AppTheme.textLight.withOpacity(0.6),
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  fontSize: 13,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (categories[index] == "Semua")
+                    Padding(
+                      padding: const EdgeInsets.only(right: 5),
+                      child: Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 13,
+                        color: isSelected
+                            ? Colors.white
+                            : AppTheme.primaryColor,
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.only(right: 5),
+                      child: Icon(
+                        Icons.pets_rounded,
+                        size: 12,
+                        color: isSelected
+                            ? Colors.white
+                            : AppTheme.primaryColor.withOpacity(0.7),
+                      ),
+                    ),
+                  Text(
+                    categories[index],
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.white
+                          : AppTheme.textPrimary,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -447,7 +487,7 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
           crossAxisCount: 2,
           crossAxisSpacing: AppTheme.spacing16,
           mainAxisSpacing: AppTheme.spacing16,
-          childAspectRatio: 0.63,
+          childAspectRatio: 0.69,
         ),
         delegate: SliverChildBuilderDelegate((context, index) {
           final kucing = filteredCats[index];
@@ -466,7 +506,7 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
           final kucing = filteredCats[index];
           final originalIndex = dataKucing.indexOf(kucing);
           return Padding(
-            padding: const EdgeInsets.only(bottom: AppTheme.spacing16),
+            padding: const EdgeInsets.only(bottom: AppTheme.spacing12),
             child: _buildListCard(kucing, originalIndex, index),
           );
         }, childCount: filteredCats.length),
@@ -475,13 +515,16 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildGridCard(Kucing kucing, int originalIndex, int animIndex) {
+    final isFav = _favoriteIndices.contains(originalIndex);
+    final isFemale = kucing.jenisKelamin.toLowerCase().contains("betina");
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 350 + (animIndex * 80)),
+      duration: Duration(milliseconds: 320 + (animIndex * 50)),
       curve: Curves.easeOutBack,
       builder: (context, value, child) {
         return Transform.scale(
-          scale: value.clamp(0.01, 2.0),
+          scale: value.clamp(0.01, 1.0),
           child: Opacity(
             opacity: value < 0.0 ? 0.0 : (value > 1.0 ? 1.0 : value),
             child: child,
@@ -492,157 +535,344 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
         onTap: () => _navigateToDetail(kucing, originalIndex),
         child: Container(
           decoration: BoxDecoration(
-            gradient: AppTheme.cardGradient,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+            border: Border.all(
+              color: AppTheme.primaryColor.withOpacity(0.08),
+              width: 1.2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primaryColor.withOpacity(0.15),
-                blurRadius: 25,
-                offset: const Offset(0, 12),
-                spreadRadius: -5,
+                color: AppTheme.primaryColor.withOpacity(0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+                spreadRadius: -2,
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image
+              // Image Container with Badges
               Stack(
                 children: [
                   Hero(
                     tag: 'gbr_$originalIndex',
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(AppTheme.radiusLarge),
-                        topRight: Radius.circular(AppTheme.radiusLarge),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(AppTheme.radiusLarge - 1),
                       ),
                       child: SizedBox(
-                        height: 150,
+                        height: 132,
                         width: double.infinity,
-                        child: Image.network(
-                          kucing.foto,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, progress) {
-                            if (progress == null) return child;
-                            return Container(
-                              color: const Color(0xFFF0ECFF),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: progress.expectedTotalBytes != null
-                                      ? progress.cumulativeBytesLoaded /
-                                            progress.expectedTotalBytes!
-                                      : null,
-                                  color: AppTheme.primaryColor,
-                                  strokeWidth: 2,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              kucing.foto,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return Container(
+                                  color: const Color(0xFFF3F0FF),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value: progress.expectedTotalBytes != null
+                                          ? progress.cumulativeBytesLoaded /
+                                                progress.expectedTotalBytes!
+                                          : null,
+                                      color: AppTheme.primaryColor,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (_, __, ___) => Container(
+                                color: const Color(0xFFF3F0FF),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.pets_rounded,
+                                    color: AppTheme.primaryLight,
+                                    size: 32,
+                                  ),
                                 ),
                               ),
-                            );
-                          },
+                            ),
+                            // Subtle bottom gradient inside image
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              height: 35,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withOpacity(0.25),
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  // Favorite button
+                  // Gender Badge on Top-Left
                   Positioned(
-                    top: 10.0,
-                    right: 10.0,
+                    top: 8,
+                    left: 8,
                     child: Container(
-                      padding: const EdgeInsets.all(AppTheme.spacing8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.92),
-                        shape: BoxShape.circle,
-                        boxShadow: AppTheme.softShadow,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: Icon(
-                        Icons.favorite_border_rounded,
-                        color: AppTheme.secondaryColor,
-                        size: 18,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isFemale
+                                ? Icons.female_rounded
+                                : Icons.male_rounded,
+                            size: 12,
+                            color: isFemale
+                                ? const Color(0xFFFF3370)
+                                : const Color(0xFF2E6FF2),
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            kucing.jenisKelamin,
+                            style: TextStyle(
+                              color: isFemale
+                                  ? const Color(0xFFFF3370)
+                                  : const Color(0xFF2E6FF2),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Favorite button on Top-Right
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isFav) {
+                            _favoriteIndices.remove(originalIndex);
+                          } else {
+                            _favoriteIndices.add(originalIndex);
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.92),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          isFav
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: AppTheme.secondaryColor,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Health dot badge on bottom-left inside image
+                  Positioned(
+                    bottom: 6,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.45),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: kucing.statusKesehatan.toLowerCase().contains("sehat")
+                                  ? const Color(0xFF00E676)
+                                  : const Color(0xFFFFB300),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            kucing.statusKesehatan,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
 
-              // Info
+              // Content Area
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12.0,
-                    vertical: 10.0,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        kucing.nama,
-                        style: AppTheme.subtitle2.copyWith(
-                          color: AppTheme.textPrimary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppTheme.spacing4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppTheme.spacing8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusSmall,
-                          ),
-                        ),
-                        child: Text(
-                          kucing.jenis,
-                          style: AppTheme.caption.copyWith(
-                            color: AppTheme.primaryColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // Name and Breed
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              formatRupiah(kucing.harga),
-                              style: AppTheme.caption.copyWith(
-                                color: AppTheme.primaryColor,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          Text(
+                            kucing.nama,
+                            style: AppTheme.subtitle2.copyWith(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14.5,
+                              height: 1.2,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                          const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(
-                                Icons.monitor_weight_outlined,
-                                color: AppTheme.textMuted,
-                                size: 13,
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor.withOpacity(0.09),
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                                ),
+                                child: Text(
+                                  kucing.jenis,
+                                  style: AppTheme.caption.copyWith(
+                                    color: AppTheme.primaryColor,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                  ),
+                                ),
                               ),
-                              const SizedBox(width: 3),
+                              const SizedBox(width: 5),
                               Text(
-                                "${kucing.beratBadan}kg",
+                                "• ${kucing.beratBadan}kg",
                                 style: AppTheme.caption.copyWith(
-                                  color: AppTheme.textMuted,
-                                  fontSize: 11,
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
                           ),
                         ],
+                      ),
+
+                      // Price & Action Button Row
+                      Container(
+                        padding: const EdgeInsets.only(top: 4),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: Colors.black.withOpacity(0.04),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Harga Adopsi",
+                                    style: TextStyle(
+                                      color: AppTheme.textMuted,
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    formatRupiah(kucing.harga),
+                                    style: const TextStyle(
+                                      color: AppTheme.primaryColor,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 12.5,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: 26,
+                              height: 26,
+                              decoration: BoxDecoration(
+                                gradient: AppTheme.primaryGradient,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.primaryColor.withOpacity(0.35),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -656,13 +886,16 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildListCard(Kucing kucing, int originalIndex, int animIndex) {
+    final isFav = _favoriteIndices.contains(originalIndex);
+    final isFemale = kucing.jenisKelamin.toLowerCase().contains("betina");
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 300 + (animIndex * 70)),
+      duration: Duration(milliseconds: 280 + (animIndex * 50)),
       curve: Curves.easeOutCubic,
       builder: (context, value, child) {
         return Transform.translate(
-          offset: Offset(0, 20 * (1 - value)),
+          offset: Offset(0, 16 * (1 - value)),
           child: Opacity(
             opacity: value < 0.0 ? 0.0 : (value > 1.0 ? 1.0 : value),
             child: child,
@@ -672,114 +905,333 @@ class _ListCatState extends State<ListCat> with SingleTickerProviderStateMixin {
       child: GestureDetector(
         onTap: () => _navigateToDetail(kucing, originalIndex),
         child: Container(
-          height: 120,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+            border: Border.all(
+              color: AppTheme.primaryColor.withOpacity(0.08),
+              width: 1.2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primaryColor.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: AppTheme.primaryColor.withOpacity(0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
                 spreadRadius: -3,
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
+          padding: const EdgeInsets.all(10),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image
-              Hero(
-                tag: 'gbr_$originalIndex',
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppTheme.radiusLarge),
-                    bottomLeft: Radius.circular(AppTheme.radiusLarge),
-                  ),
-                  child: SizedBox(
-                    width: 120,
-                    height: 120,
-                    child: Image.network(kucing.foto, fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-
-              // Info
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppTheme.spacing16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              kucing.nama,
-                              style: AppTheme.subtitle2.copyWith(
-                                color: AppTheme.textPrimary,
-                                fontWeight: FontWeight.w700,
+              // Image Thumbnail with Hero and Badges
+              Stack(
+                children: [
+                  Hero(
+                    tag: 'gbr_$originalIndex',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                      child: SizedBox(
+                        width: 108,
+                        height: 114,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              kucing.foto,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return Container(
+                                  color: const Color(0xFFF3F0FF),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value: progress.expectedTotalBytes != null
+                                          ? progress.cumulativeBytesLoaded /
+                                                progress.expectedTotalBytes!
+                                          : null,
+                                      color: AppTheme.primaryColor,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (_, __, ___) => Container(
+                                color: const Color(0xFFF3F0FF),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.pets_rounded,
+                                    color: AppTheme.primaryLight,
+                                    size: 28,
+                                  ),
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          Icon(
-                            Icons.favorite_border_rounded,
-                            color: AppTheme.secondaryColor,
-                            size: 18,
+                            // Subtle gradient overlay at bottom
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              height: 30,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withOpacity(0.3),
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Gender Icon Badge inside image top-left
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.92),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 4,
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppTheme.spacing4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppTheme.spacing8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusSmall,
-                          ),
-                        ),
-                        child: Text(
-                          kucing.jenis,
-                          style: AppTheme.caption.copyWith(
-                            color: AppTheme.primaryColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 10,
-                          ),
-                        ),
+                      child: Icon(
+                        isFemale ? Icons.female_rounded : Icons.male_rounded,
+                        size: 13,
+                        color: isFemale
+                            ? const Color(0xFFFF3370)
+                            : const Color(0xFF2E6FF2),
                       ),
-                      const SizedBox(height: AppTheme.spacing8),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(width: 12),
+
+              // Detailed Content Area
+              Expanded(
+                child: SizedBox(
+                  height: 114,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Header: Cat Name + Favorite Button
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            formatRupiah(kucing.harga),
-                            style: AppTheme.body2.copyWith(
-                              color: AppTheme.primaryColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  kucing.nama,
+                                  style: AppTheme.subtitle2.copyWith(
+                                    color: AppTheme.textPrimary,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15.5,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 3),
+                                // Chips Row: Breed + Gender
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor.withOpacity(0.09),
+                                        borderRadius: BorderRadius.circular(
+                                          AppTheme.radiusSmall,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        kucing.jenis,
+                                        style: AppTheme.caption.copyWith(
+                                          color: AppTheme.primaryColor,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      kucing.jenisKelamin,
+                                      style: TextStyle(
+                                        color: isFemale
+                                            ? const Color(0xFFFF4B82)
+                                            : const Color(0xFF2E6FF2),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: AppTheme.spacing12),
-                          Icon(
-                            Icons.monitor_weight_outlined,
-                            color: AppTheme.textMuted,
-                            size: 13,
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (isFav) {
+                                  _favoriteIndices.remove(originalIndex);
+                                } else {
+                                  _favoriteIndices.add(originalIndex);
+                                }
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceColor.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                isFav
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_border_rounded,
+                                color: AppTheme.secondaryColor,
+                                size: 17,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Attributes: Health + Weight + Color
+                      Row(
+                        children: [
+                          // Health Indicator
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: kucing.statusKesehatan.toLowerCase().contains("sehat")
+                                  ? const Color(0xFF00E676)
+                                  : const Color(0xFFFFB300),
+                              shape: BoxShape.circle,
+                            ),
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "${kucing.beratBadan} kg",
-                            style: AppTheme.caption.copyWith(
+                            kucing.statusKesehatan,
+                            style: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "•",
+                            style: TextStyle(
                               color: AppTheme.textMuted,
+                              fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.monitor_weight_outlined,
+                            size: 12,
+                            color: AppTheme.textMuted,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            "${kucing.beratBadan} kg",
+                            style: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Bottom: Price & Detail Button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Harga Adopsi",
+                                style: TextStyle(
+                                  color: AppTheme.textMuted,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                formatRupiah(kucing.harga),
+                                style: const TextStyle(
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: AppTheme.primaryGradient,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusMedium,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primaryColor.withOpacity(0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Text(
+                                  "Detail",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                SizedBox(width: 3),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                              ],
                             ),
                           ),
                         ],

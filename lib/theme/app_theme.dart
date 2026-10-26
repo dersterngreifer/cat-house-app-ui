@@ -101,8 +101,12 @@ class AppTheme {
   static const double radiusLarge = 24.0;
   static const double radiusXLarge = 36.0;
 
+  // Font Family
+  static const String fontName = 'Arial';
+
   // Typography
   static const TextStyle heading1 = TextStyle(
+    fontFamily: fontName,
     fontSize: 36,
     fontWeight: FontWeight.w800,
     letterSpacing: -0.5,
@@ -110,6 +114,7 @@ class AppTheme {
   );
 
   static const TextStyle heading2 = TextStyle(
+    fontFamily: fontName,
     fontSize: 28,
     fontWeight: FontWeight.bold,
     letterSpacing: -0.3,
@@ -117,24 +122,28 @@ class AppTheme {
   );
 
   static const TextStyle heading3 = TextStyle(
+    fontFamily: fontName,
     fontSize: 22,
     fontWeight: FontWeight.w700,
     letterSpacing: -0.2,
   );
 
   static const TextStyle subtitle1 = TextStyle(
+    fontFamily: fontName,
     fontSize: 18,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.1,
   );
 
   static const TextStyle subtitle2 = TextStyle(
+    fontFamily: fontName,
     fontSize: 16,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   );
 
   static const TextStyle body1 = TextStyle(
+    fontFamily: fontName,
     fontSize: 16,
     fontWeight: FontWeight.normal,
     letterSpacing: 0.1,
@@ -142,12 +151,14 @@ class AppTheme {
   );
 
   static const TextStyle body2 = TextStyle(
+    fontFamily: fontName,
     fontSize: 14,
     fontWeight: FontWeight.normal,
     letterSpacing: 0.1,
   );
 
   static const TextStyle caption = TextStyle(
+    fontFamily: fontName,
     fontSize: 12,
     fontWeight: FontWeight.normal,
     letterSpacing: 0.2,

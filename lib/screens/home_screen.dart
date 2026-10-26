@@ -102,22 +102,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        height: size.height,
+        height: double.infinity,
         decoration: const BoxDecoration(gradient: AppTheme.homeGradient),
         child: Stack(
           children: [
             _buildDecorativeBlobs(size),
             SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildAppBar(),
-                  const Spacer(),
-                  _buildCatIllustration(),
-                  const SizedBox(height: AppTheme.spacing40),
-                  _buildBottomContent(),
-                  const SizedBox(height: AppTheme.spacing40),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildAppBar(),
+                            const SizedBox(height: AppTheme.spacing8),
+                            const Spacer(),
+                            _buildCatIllustration(),
+                            const Spacer(),
+                            const SizedBox(height: AppTheme.spacing16),
+                            _buildBottomContent(),
+                            const SizedBox(height: AppTheme.spacing24),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -207,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.spacing24,
-          vertical: AppTheme.spacing20,
+          vertical: AppTheme.spacing12,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -286,8 +302,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 // Outer radial glow
                 Container(
-                  width: 280,
-                  height: 280,
+                  width: 240,
+                  height: 240,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
@@ -300,8 +316,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 // Inner circle with border
                 Container(
-                  width: 200,
-                  height: 200,
+                  width: 180,
+                  height: 180,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -349,28 +365,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               // Stats row
               _buildStatsCard(),
-              const SizedBox(height: AppTheme.spacing24),
+              const SizedBox(height: AppTheme.spacing20),
 
               // Title
               Text(
                 "Temukan Kucing\nImpianmu ✨",
                 style: AppTheme.heading1.copyWith(
                   color: AppTheme.textLight,
-                  fontSize: 36,
+                  fontSize: 32,
+                  height: 1.15,
                 ),
               ),
-              const SizedBox(height: AppTheme.spacing12),
+              const SizedBox(height: AppTheme.spacing8),
 
               // Subtitle
               Text(
                 "Ribuan teman berbulu menunggumu. Mulai petualangan bersama kucing kesayanganmu sekarang.",
                 style: AppTheme.body2.copyWith(
                   color: AppTheme.textLight.withOpacity(0.55),
-                  height: 1.65,
-                  fontSize: 15,
+                  height: 1.5,
+                  fontSize: 14,
                 ),
               ),
-              const SizedBox(height: AppTheme.spacing32),
+              const SizedBox(height: AppTheme.spacing24),
 
               // CTA Button
               _buildCTAButton(),
@@ -395,11 +412,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildStatItem("5+", "Kucing"),
+          Expanded(child: _buildStatItem("5+", "Kucing")),
           _buildVerticalDivider(),
-          _buildStatItem("5", "Ras"),
+          Expanded(child: _buildStatItem("5", "Ras")),
           _buildVerticalDivider(),
-          _buildStatItem("100%", "Sehat"),
+          Expanded(child: _buildStatItem("100%", "Sehat")),
         ],
       ),
     );
@@ -457,8 +474,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
         padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.spacing32,
-          vertical: AppTheme.spacing20,
+          horizontal: AppTheme.spacing24,
+          vertical: AppTheme.spacing16,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
