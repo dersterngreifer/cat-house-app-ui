@@ -1,4 +1,6 @@
 gradle-wrapper.jar
+/build/
+app/build/
 /.gradle
 /captures/
 /gradlew
